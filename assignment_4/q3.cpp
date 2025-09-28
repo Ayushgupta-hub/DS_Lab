@@ -1,127 +1,107 @@
 #include <iostream>
-#define MAX 5
 using namespace std;
 
 class Queue {
-public:
     int front;
     int rear;
-    int array[MAX];
+    int arr[10];
+    int count;
 
-    Queue() : front(-1), rear(-1) {}
-
-    bool isFull() {
-        return (front == (rear + 1) % MAX);
-    }
-
-    bool isEmpty() {
-        return (front == -1 && rear == -1);
+public:
+    Queue() {
+        front = -1;
+        rear = -1;
+        count = 0;
     }
 
     void enqueue(int val) {
-        if (isFull()) {
-            cout << "Queue Overflow" << endl;
-            return;
-        }
-        if (isEmpty()) {
+        if (count == 10) return;
+        if (count == 0) {
             front = rear = 0;
         } else {
-            rear = (rear + 1) % MAX;
+            rear = (rear + 1) % 10;
         }
-        array[rear] = val;
+        arr[rear] = val;
+        count++;
     }
 
     void dequeue() {
-        if (isEmpty()) {
-            cout << "Queue Underflow" << endl;
-            return;
-        }
-        cout << "Dequeued: " << array[front] << endl;
+        if (count == 0) return;
         if (front == rear) {
-            front = rear = -1; // queue becomes empty
+            front = rear = -1;
         } else {
-            front = (front + 1) % MAX;
+            front = (front + 1) % 10;
         }
+        count--;
+    }
+
+    bool isEmpty() {
+        return count == 0;
     }
 
     int peek() {
-        if (isEmpty()) {
-            cout << "Queue Underflow" << endl;
-            return -1;
-        }
-        return array[front];
+        if (count == 0) return -1;
+        return arr[front];
     }
 
     void display() {
-        if (isEmpty()) {
-            cout << "Queue is empty!" << endl;
+        if (count == 0) {
+            cout << endl;
             return;
         }
         int i = front;
-        cout << "Queue elements: ";
-        while (true) {
-            cout << array[i] << " ";
-            if (i == rear) break;
-            i = (i + 1) % MAX;
+        for (int c = 0; c < count; c++) {
+            cout << arr[i] << " ";
+            i = (i + 1) % 10;
         }
         cout << endl;
     }
+
+    int getSize() {
+        return count;
+    }
 };
+
+void interleave(Queue &q) {
+    int n = q.getSize();
+    if (n % 2 != 0) return;
+
+    Queue q2;
+
+    for (int i = 0; i < n / 2; i++) {
+        int x = q.peek();
+        q.dequeue();
+        q2.enqueue(x);
+    }
+
+    while (!q2.isEmpty()) {
+        int x = q2.peek();
+        q2.dequeue();
+        q.enqueue(x);
+
+        x = q.peek();
+        q.dequeue();
+        q.enqueue(x);
+    }
+}
 
 int main() {
     Queue q;
-    int choice, val;
+    q.enqueue(10);
+    q.enqueue(20);
+    q.enqueue(30);
+    q.enqueue(40);
+    q.enqueue(50);
+    q.enqueue(60);
 
-    do {
-        cout << "\n--- Circular Queue Menu ---\n";
-        cout << "1. Enqueue\n";
-        cout << "2. Dequeue\n";
-        cout << "3. Peek (Front Element)\n";
-        cout << "4. Display Queue\n";
-        cout << "5. Check if Empty\n";
-        cout << "6. Check if Full\n";
-        cout << "0. Exit\n";
-        cout << "Enter your choice: ";
-        cin >> choice;
+    cout << "Original Queue: ";
+    q.display();
 
-        switch (choice) {
-        case 1:
-            cout << "Enter value to enqueue: ";
-            cin >> val;
-            q.enqueue(val);
-            break;
+    interleave(q);
 
-        case 2:
-            q.dequeue();
-            break;
-
-        case 3:
-            val = q.peek();
-            if (val != -1)
-                cout << "Front element: " << val << endl;
-            break;
-
-        case 4:
-            q.display();
-            break;
-
-        case 5:
-            cout << (q.isEmpty() ? "Queue is Empty" : "Queue is NOT Empty") << endl;
-            break;
-
-        case 6:
-            cout << (q.isFull() ? "Queue is Full" : "Queue is NOT Full") << endl;
-            break;
-
-        case 0:
-            cout << "Exiting program..." << endl;
-            break;
-
-        default:
-            cout << "Invalid choice! Try again." << endl;
-        }
-
-    } while (choice != 0);
+    cout << "Interleaved Queue: ";
+    q.display();
 
     return 0;
 }
+
